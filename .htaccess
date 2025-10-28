@@ -1,0 +1,24 @@
+# Root-level rewrite to serve PHP pages in /src and keep existing .php links working
+RewriteEngine On
+
+# Serve existing files and directories directly
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule . - [L]
+
+# Map any top-level .php request to /src/<name>.php
+RewriteRule ^index\.php$ index.php [L,QSA]
+RewriteCond %{REQUEST_URI} \/?[^/]+\.php$
+RewriteRule ^([^/]+)\.php$ src/$1.php [L,QSA]
+
+# Map any top-level .php request to /src/<name>.php if it doesn't exist at root
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^/]+)\.php$ src/$1.php [L,QSA]
+
+# If requesting without extension at root, try /src/<name>.php
+RewriteCond %{REQUEST_URI} \/?[^/.]+$
+RewriteCond %{DOCUMENT_ROOT}/src/%1.php -f
+RewriteRule ^([^/.]+)$ src/$1.php [L,QSA]
+
+# Default directory index now at project root
+DirectoryIndex index.php index.php
